@@ -3,11 +3,11 @@
 [![PyPI Version](https://img.shields.io/pypi/v/vedro-hooks)](https://pypi.org/project/vedro-hooks/)
 [![License](https://img.shields.io/github/license/mickeystreicher/vedro-hooks)](https://github.com/mickeystreicher/vedro-hooks/blob/main/LICENSE)
 
-`vedro-hooks` is a plugin for the Vedro testing framework that allows you to attach custom hooks to various testing events, such as startup, scenario execution, and cleanup. This enables you to perform specific actions automatically at different stages of the testing lifecycle.
+`vedro-hooks` is a plugin for the [Vedro](https://vedro.io) testing framework that allows you to attach custom hooks to various testing events, such as startup, scenario execution, and cleanup. This enables you to perform specific actions automatically at different stages of the testing lifecycle.
 
 ## Installation
 
-To install `vedro-hooks`, you can use the `vedro plugin install` command:
+To install [vedro-hooks](https://pypi.org/project/vedro-hooks/), you can use the `vedro plugin install` command:
 
 ```sh
 $ vedro plugin install vedro-hooks
@@ -21,7 +21,7 @@ $ pip install vedro
 
 ## Usage
 
-You can register your custom hooks anywhere in your project; however, it is recommended to register them in the vedro.cfg.py file to keep your configuration centralized and easy to locate. Below is an example setup:
+You can register your custom hooks anywhere in your project; however, it is recommended to register them in the `vedro.cfg.py` file to keep your configuration centralized and easy to locate. Below is an example setup:
 
 ```python
 from vedro.events import CleanupEvent, ScenarioRunEvent, StartupEvent
