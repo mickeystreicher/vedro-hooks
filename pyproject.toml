@@ -1,0 +1,30 @@
+[tool.poetry]
+name = "vedro-hooks"
+version = "0.1.0"
+description = "Enables custom hooks for Vedro, allowing actions on events like startup, scenario execution, and cleanup"
+authors = [
+    "Mickey Streicher <mickeystreicher@fastmail.us>"
+]
+license = "Apache-2.0"
+readme = "README.md"
+repository = "https://github.com/mickeystreicher/vedro-hooks"
+classifiers = [
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Typing :: Typed",
+]
+
+[tool.poetry.dependencies]
+python = ">=3.8"
+vedro = ">=1.9,<2.0"
+
+[tool.poetry.dev-dependencies]
+parameterized = "0.9.0"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
