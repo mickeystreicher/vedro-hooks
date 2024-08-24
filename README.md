@@ -72,3 +72,23 @@ def my_cleanup_hook(event: CleanupEvent):
 - `@on_cleanup`: Register a function to be executed when the testing process ends.
 
 For more detailed information about the events these decorators can hook into, you can refer to the [Vedro Plugin Guide](https://vedro.io/docs/guides/writing-plugins).
+
+## Configuration
+
+The `VedroHooksPlugin` can be configured using the following options in your `vedro.cfg.py`:
+
+- `show_hooks`: When set to `True`, a summary of all registered hooks will be displayed at the end of the testing process.
+- `ignore_errors`: When set to `True`, the plugin will ignore any errors that occur within the hooks and continue the test execution. Errors encountered will be logged and summarized at the end of the testing process.
+
+```python
+import vedro
+import vedro_hooks
+
+class Config(vedro.Config):
+
+    class Plugins(vedro.Config.Plugins):
+
+        class VedroHooks(vedro_hooks.VedroHooks):
+            ignore_errors = True
+            show_hooks = True
+```
