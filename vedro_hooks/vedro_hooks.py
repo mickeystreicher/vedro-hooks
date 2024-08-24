@@ -1,3 +1,4 @@
+import inspect
 from asyncio import iscoroutinefunction
 from os import linesep
 from typing import List, Type, TypeVar
@@ -55,6 +56,7 @@ class VedroHooksPlugin(Plugin):
     def __init__(self, config: Type["VedroHooks"], *, hooks: Hooks = _hooks) -> None:
         super().__init__(config)
         self._hooks = hooks
+        self._show_hooks = config.show_hooks
         self._ignore_errors = config.ignore_errors
         self._errors: List[str] = []
 
@@ -72,23 +74,40 @@ class VedroHooksPlugin(Plugin):
     async def on_event(self, event: Event) -> None:
         for hook in self._hooks.get_hooks(event):
             try:
-                await self.run_hook(hook, event)
+                await self._run_hook(hook, event)
             except BaseException as e:
                 if not self._ignore_errors:
                     raise
                 self._errors.append(f"Error in hook '{hook.__name__}': {e!r}")
 
-    async def run_hook(self, hook: HookType, event: Event) -> None:
+    async def _run_hook(self, hook: HookType, event: Event) -> None:
         if iscoroutinefunction(hook):
             await hook(event)
         else:
             hook(event)
 
     async def on_cleanup(self, event: CleanupEvent) -> None:
+        if self._show_hooks:
+            hooks = self._get_hooks()
+            if hooks:
+                hook_prefix = f"{linesep}#  - "
+                event.report.add_summary(
+                    f"[vedro-hooks] Hooks:{hook_prefix}" + f"{hook_prefix}".join(hooks))
+            else:
+                event.report.add_summary("[vedro-hooks] Hooks: No hooks registered")
+
         if self._errors:
             error_prefix = f"{linesep}#  - "
-            summary = f"Vedro Hooks:{error_prefix}" + f"{error_prefix}".join(self._errors)
-            event.report.add_summary(summary)
+            event.report.add_summary(
+                f"[vedro-hooks] Errors:{error_prefix}" + f"{error_prefix}".join(self._errors))
+
+    def _get_hooks(self) -> List[str]:
+        hooks = []
+        for event_name, hook in self._hooks.get_all_hooks():
+            hook_file = inspect.getfile(hook)
+            hook_line = inspect.getsourcelines(hook)[1]
+            hooks.append(f"'{hook.__name__}' ({event_name}) {hook_file}:{hook_line}")
+        return hooks
 
 
 class VedroHooks(PluginConfig):
@@ -96,4 +115,5 @@ class VedroHooks(PluginConfig):
     description = ("Enables custom hooks for Vedro, "
                    "allowing actions on events like startup, scenario execution, and cleanup")
 
+    show_hooks: bool = False
     ignore_errors: bool = False

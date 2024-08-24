@@ -140,7 +140,34 @@ class TestVedroHooksPlugin(unittest.IsolatedAsyncioTestCase):
 
         hook.assert_called_once_with(event)
         report.add_summary.assert_called_once_with(
-            "Vedro Hooks:\n#  - Error in hook 'hook': ValueError()")
+            "[vedro-hooks] Errors:\n#  - Error in hook 'hook': ValueError()")
+
+    async def test_show_hooks_default_false(self):
+        hook = on_scenario_run(Mock(), hooks=self.hooks)  # noqa: F841
+
+        report = Mock()
+        await self.dispatcher.fire(CleanupEvent(report))
+
+        report.add_summary.assert_not_called()
+
+    async def test_show_hooks_no_hooks_registered(self):
+        self.plugin._show_hooks = True
+
+        report = Mock()
+        await self.dispatcher.fire(CleanupEvent(report))
+
+        report.add_summary.assert_called_once_with(
+            "[vedro-hooks] Hooks: No hooks registered")
+
+    async def test_show_hooks_with_registered_hooks(self):
+        self.plugin._show_hooks = True
+
+        on_scenario_run(lambda event: None, hooks=self.hooks)
+
+        report = Mock()
+        await self.dispatcher.fire(CleanupEvent(report))
+
+        report.add_summary.assert_called_once()
 
 
 if __name__ == "__main__":

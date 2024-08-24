@@ -1,4 +1,4 @@
-from typing import Awaitable, Callable, Dict, List, Type, Union
+from typing import Awaitable, Callable, Dict, Generator, List, Tuple, Type, Union
 
 from vedro.events import Event
 
@@ -20,3 +20,8 @@ class Hooks:
     def get_hooks(self, event: Event) -> List[HookType]:
         event_name = event.__class__.__name__
         return self._hooks.get(event_name, [])
+
+    def get_all_hooks(self) -> Generator[Tuple[str, HookType], None, None]:
+        for event_name, hooks in self._hooks.items():
+            for hook in hooks:
+                yield (event_name, hook)
