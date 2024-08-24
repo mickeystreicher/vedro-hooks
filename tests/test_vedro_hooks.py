@@ -103,6 +103,45 @@ class TestVedroHooksPlugin(unittest.IsolatedAsyncioTestCase):
 
         getattr(hook, assert_method)(event)
 
+    async def test_ignore_errors_default_false(self):
+        func = Mock(side_effect=ValueError, __name__="hook")
+        hook = on_scenario_run(func, hooks=self.hooks)
+        event = ScenarioRunEvent(scenario_result=Mock())
+
+        with self.assertRaises(ValueError):
+            await self.dispatcher.fire(event)
+
+        hook.assert_called_once_with(event)
+
+    async def test_ignore_errors_on_cleanup_no_errors(self):
+        self.plugin._ignore_errors = True
+
+        func = Mock()
+        hook = on_scenario_run(func, hooks=self.hooks)
+        event = ScenarioRunEvent(scenario_result=Mock())
+        await self.dispatcher.fire(event)
+
+        report = Mock()
+        await self.dispatcher.fire(CleanupEvent(report))
+
+        hook.assert_called_once_with(event)
+        report.add_summary.assert_not_called()
+
+    async def test_ignore_errors_on_cleanup_with_errors(self):
+        self.plugin._ignore_errors = True
+
+        func = Mock(side_effect=ValueError, __name__="hook")
+        hook = on_scenario_run(func, hooks=self.hooks)
+        event = ScenarioRunEvent(scenario_result=Mock())
+        await self.dispatcher.fire(event)
+
+        report = Mock()
+        await self.dispatcher.fire(CleanupEvent(report))
+
+        hook.assert_called_once_with(event)
+        report.add_summary.assert_called_once_with(
+            "Vedro Hooks:\n#  - Error in hook 'hook': ValueError()")
+
 
 if __name__ == "__main__":
     unittest.main()

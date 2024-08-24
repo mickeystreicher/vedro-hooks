@@ -21,7 +21,7 @@ $ pip install vedro
 
 ## Usage
 
-To use `vedro-hooks`, you need to register your custom hooks in the `vedro.cfg.py` file. Below is an example setup:
+You can register your custom hooks anywhere in your project; however, it is recommended to register them in the vedro.cfg.py file to keep your configuration centralized and easy to locate. Below is an example setup:
 
 ```python
 from vedro.events import CleanupEvent, ScenarioRunEvent, StartupEvent
@@ -46,24 +46,20 @@ def my_cleanup_hook(event: CleanupEvent):
 ### Sync and Async Hooks
 
 `vedro-hooks` supports both synchronous and asynchronous hooks, allowing you to handle events in the way that best suits your needs:
-
-**Sync Hook Example**
-
-```python
-@on_scenario_passed
-def my_sync_hook(event):
-    scenario = event.scenario_result.scenario
-    print(f"Scenario passed: {scenario.subject}")
-```
-
-**Async Hook Example**
-
-```python
-@on_scenario_failed
-async def my_async_hook(event):
-    scenario = event.scenario_result.scenario
-    print(f"Scenario failed: {scenario.subject}")
-```
+- **Sync Hook Example**
+    ```python
+    @on_scenario_passed
+    def my_sync_hook(event):
+        scenario = event.scenario_result.scenario
+        print(f"Scenario passed: {scenario.subject}")
+    ```
+- **Async Hook Example**
+    ```python
+    @on_scenario_failed
+    async def my_async_hook(event):
+        scenario = event.scenario_result.scenario
+        print(f"Scenario failed: {scenario.subject}")
+    ```
 
 ### Available Decorators
 

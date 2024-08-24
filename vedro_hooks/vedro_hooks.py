@@ -1,5 +1,6 @@
 from asyncio import iscoroutinefunction
-from typing import Type, TypeVar
+from os import linesep
+from typing import List, Type, TypeVar
 
 from vedro.core import Dispatcher, Plugin, PluginConfig
 from vedro.events import (CleanupEvent, Event, ScenarioFailedEvent, ScenarioPassedEvent, ScenarioReportedEvent,
@@ -54,6 +55,8 @@ class VedroHooksPlugin(Plugin):
     def __init__(self, config: Type["VedroHooks"], *, hooks: Hooks = _hooks) -> None:
         super().__init__(config)
         self._hooks = hooks
+        self._ignore_errors = config.ignore_errors
+        self._errors: List[str] = []
 
     def subscribe(self, dispatcher: Dispatcher) -> None:
         dispatcher.listen(StartupEvent, self.on_event) \
@@ -64,15 +67,33 @@ class VedroHooksPlugin(Plugin):
                   .listen(ScenarioReportedEvent, self.on_event) \
                   .listen(CleanupEvent, self.on_event)
 
+        dispatcher.listen(CleanupEvent, self.on_cleanup)
+
     async def on_event(self, event: Event) -> None:
         for hook in self._hooks.get_hooks(event):
-            if iscoroutinefunction(hook):
-                await hook(event)
-            else:
-                hook(event)
+            try:
+                await self.run_hook(hook, event)
+            except BaseException as e:
+                if not self._ignore_errors:
+                    raise
+                self._errors.append(f"Error in hook '{hook.__name__}': {e!r}")
+
+    async def run_hook(self, hook: HookType, event: Event) -> None:
+        if iscoroutinefunction(hook):
+            await hook(event)
+        else:
+            hook(event)
+
+    async def on_cleanup(self, event: CleanupEvent) -> None:
+        if self._errors:
+            error_prefix = f"{linesep}#  - "
+            summary = f"Vedro Hooks:{error_prefix}" + f"{error_prefix}".join(self._errors)
+            event.report.add_summary(summary)
 
 
 class VedroHooks(PluginConfig):
     plugin = VedroHooksPlugin
     description = ("Enables custom hooks for Vedro, "
                    "allowing actions on events like startup, scenario execution, and cleanup")
+
+    ignore_errors: bool = False
