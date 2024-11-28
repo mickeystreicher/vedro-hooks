@@ -4,8 +4,8 @@ from os import linesep
 from typing import List, Type, TypeVar
 
 from vedro.core import Dispatcher, Plugin, PluginConfig
-from vedro.events import (CleanupEvent, Event, ScenarioFailedEvent, ScenarioPassedEvent, ScenarioReportedEvent,
-                          ScenarioRunEvent, ScenarioSkippedEvent, StartupEvent)
+from vedro.events import (ArgParsedEvent, ArgParseEvent, CleanupEvent, Event, ScenarioFailedEvent, ScenarioPassedEvent,
+                          ScenarioReportedEvent, ScenarioRunEvent, ScenarioSkippedEvent, StartupEvent)
 
 from .hooks import Hooks, HookType
 
@@ -61,7 +61,9 @@ class VedroHooksPlugin(Plugin):
         self._errors: List[str] = []
 
     def subscribe(self, dispatcher: Dispatcher) -> None:
-        dispatcher.listen(StartupEvent, self.on_event) \
+        dispatcher.listen(ArgParseEvent, self.on_arg_parse) \
+                  .listen(ArgParsedEvent, self.on_arg_parsed) \
+                  .listen(StartupEvent, self.on_event) \
                   .listen(ScenarioRunEvent, self.on_event) \
                   .listen(ScenarioPassedEvent, self.on_event) \
                   .listen(ScenarioFailedEvent, self.on_event) \
@@ -70,6 +72,17 @@ class VedroHooksPlugin(Plugin):
                   .listen(CleanupEvent, self.on_event)
 
         dispatcher.listen(CleanupEvent, self.on_cleanup)
+
+    def on_arg_parse(self, event: ArgParseEvent) -> None:
+        group = event.arg_parser.add_argument_group("Vedro Hooks")
+        group.add_argument("--hooks-show", action="store_true", default=self._show_hooks,
+                           help="Show registered hooks in the cleanup summary")
+        group.add_argument("--hooks-ignore-errors", action="store_true", default=self._ignore_errors,
+                           help="Ignore errors in hooks and continue execution")
+
+    def on_arg_parsed(self, event: ArgParsedEvent) -> None:
+        self._show_hooks = event.args.hooks_show
+        self._ignore_errors = event.args.hooks_ignore_errors
 
     async def on_event(self, event: Event) -> None:
         for hook in self._hooks.get_hooks(event):

@@ -92,3 +92,13 @@ class Config(vedro.Config):
             ignore_errors = True
             show_hooks = True
 ```
+
+### Command-Line Arguments
+
+- **`--hooks-show`:**  
+  When enabled, after the testing process completes, a summary of all registered hooks along with their source locations will be displayed. This is useful for debugging and verifying which hooks are active.
+
+- **`--hooks-ignore-errors`:**  
+  When enabled, any exceptions raised within your hooks will be caught and logged without interrupting the entire test run. This ensures that one failing hook does not prevent the execution of subsequent tests or hooks.
+
+These CLI arguments take precedence over the configuration specified in `vedro.cfg.py`.
