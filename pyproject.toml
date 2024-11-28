@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "vedro-hooks"
-version = "0.2.0"
+version = "0.3.0"
 description = "Enables custom hooks for Vedro, allowing actions on events like startup, scenario execution, and cleanup"
 authors = [
     "Mickey Streicher <mickeystreicher@fastmail.us>"
