@@ -4,8 +4,9 @@ from os import linesep
 from typing import List, Type, TypeVar
 
 from vedro.core import Dispatcher, Plugin, PluginConfig
-from vedro.events import (ArgParsedEvent, ArgParseEvent, CleanupEvent, Event, ScenarioFailedEvent, ScenarioPassedEvent,
-                          ScenarioReportedEvent, ScenarioRunEvent, ScenarioSkippedEvent, StartupEvent)
+from vedro.events import (ArgParsedEvent, ArgParseEvent, CleanupEvent, Event, ScenarioFailedEvent,
+                          ScenarioPassedEvent, ScenarioReportedEvent, ScenarioRunEvent,
+                          ScenarioSkippedEvent, StartupEvent)
 
 from .hooks import Hooks, HookType
 
@@ -75,9 +76,11 @@ class VedroHooksPlugin(Plugin):
 
     def on_arg_parse(self, event: ArgParseEvent) -> None:
         group = event.arg_parser.add_argument_group("Vedro Hooks")
-        group.add_argument("--hooks-show", action="store_true", default=self._show_hooks,
+        group.add_argument("--hooks-show", action="store_true",
+                           default=self._show_hooks,
                            help="Show registered hooks in the cleanup summary")
-        group.add_argument("--hooks-ignore-errors", action="store_true", default=self._ignore_errors,
+        group.add_argument("--hooks-ignore-errors", action="store_true",
+                           default=self._ignore_errors,
                            help="Ignore errors in hooks and continue execution")
 
     def on_arg_parsed(self, event: ArgParsedEvent) -> None:
